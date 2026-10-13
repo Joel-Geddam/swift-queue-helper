@@ -3,7 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PriorityQueue,
   TRIAGE_PRIORITY,
+  analyseSymptoms,
+  computePriority,
   type Patient,
+  type SymptomTier,
   type TriageLevel,
 } from "@/lib/priorityQueue";
 
@@ -41,6 +44,31 @@ const levelLabel: Record<TriageLevel, string> = {
   standard: "P3 · Standard",
 };
 
+const tierStyles: Record<SymptomTier, string> = {
+  critical: "bg-emergency text-emergency-foreground",
+  urgent: "bg-urgent text-urgent-foreground",
+  mild: "border border-border bg-muted text-muted-foreground",
+};
+
+const tierLabel: Record<SymptomTier, string> = {
+  critical: "Critical sign",
+  urgent: "Urgent sign",
+  mild: "Mild sign",
+};
+
+function FlagChip({ condition }: { condition: string }) {
+  const flag = analyseSymptoms(condition);
+  if (!flag) return null;
+  return (
+    <span
+      title={flag.matched.join(", ")}
+      className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${tierStyles[flag.tier]}`}
+    >
+      {tierLabel[flag.tier]}
+    </span>
+  );
+}
+
 function waitTime(from: number, now: number) {
   const m = Math.floor((now - from) / 60000);
   return m < 1 ? "<1 min" : `${m} min`;
@@ -66,7 +94,11 @@ function Index() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        (s.waiting as Patient[]).forEach((p) => queueRef.current.enqueue(p));
+        (s.waiting as Patient[]).forEach((p) => {
+          // Re-score with the current formula so saved rows stay comparable.
+          p.priority = computePriority(p.level, p.condition);
+          queueRef.current.enqueue(p);
+        });
         setCurrent(s.current ?? null);
         setServed(s.served ?? []);
         setTicket(s.ticket ?? 1);
@@ -110,7 +142,7 @@ function Index() {
       age: Number(age) || 0,
       condition: condition.trim() || "—",
       level,
-      priority: TRIAGE_PRIORITY[level],
+      priority: computePriority(level, condition),
       arrivedAt: Date.now(),
       status: "waiting",
     });
@@ -142,6 +174,8 @@ function Index() {
     setTicket(1);
     setVersion((v) => v + 1);
   }
+
+  const flag = analyseSymptoms(condition);
 
   const inputCls =
     "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
@@ -176,6 +210,16 @@ function Index() {
             <input className={inputCls} placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} required />
             <input className={inputCls} placeholder="Age" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
             <input className={inputCls} placeholder="Symptoms / condition" value={condition} onChange={(e) => setCondition(e.target.value)} />
+            {flag && (
+              <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className={`rounded px-2 py-0.5 font-medium ${tierStyles[flag.tier]}`}>
+                  {tierLabel[flag.tier]}
+                </span>
+                <span>
+                  “{flag.matched.slice(0, 3).join(", ")}” raises urgency — score {computePriority(level, condition)}
+                </span>
+              </p>
+            )}
             <div>
               <p className="mb-2 text-xs font-medium text-muted-foreground">Triage level</p>
               <div className="grid grid-cols-3 gap-2">
@@ -228,6 +272,7 @@ function Index() {
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${levelStyles[current.level]}`}>
                       {levelLabel[current.level]}
                     </span>
+                    <FlagChip condition={current.condition} />
                   </div>
                 ) : (
                   <p className="mt-1 text-muted-foreground">No patient being served</p>
@@ -246,7 +291,9 @@ function Index() {
           <section className="rounded-lg border border-border bg-card">
             <div className="flex items-center justify-between border-b border-border px-5 py-3">
               <h2 className="font-semibold">Waiting queue</h2>
-              <span className="text-xs text-muted-foreground">{waiting.length} patients · sorted by priority, then arrival</span>
+              <span className="text-xs text-muted-foreground">
+                {waiting.length} patients · triage + symptoms, then arrival
+              </span>
             </div>
             {waiting.length === 0 ? (
               <p className="px-5 py-10 text-center text-sm text-muted-foreground">Queue is empty.</p>
@@ -263,6 +310,7 @@ function Index() {
                         {p.condition}
                       </p>
                     </div>
+                    <FlagChip condition={p.condition} />
                     <span className="text-xs text-muted-foreground">{waitTime(p.arrivedAt, now)}</span>
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${levelStyles[p.level]}`}>
                       {levelLabel[p.level]}

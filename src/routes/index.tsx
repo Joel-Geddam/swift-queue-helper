@@ -124,7 +124,7 @@ function Index() {
 
   function callNext() {
     const next = queueRef.current.dequeue();
-    if (current) setServed((s) => [{ ...current, status: "served" }, ...s].slice(0, 20));
+    if (current) setServed((s) => [{ ...current, status: "served" as const }, ...s].slice(0, 20));
     setCurrent(next ? { ...next, status: "called" } : null);
     setVersion((v) => v + 1);
   }

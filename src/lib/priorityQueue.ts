@@ -66,7 +66,7 @@ export class PriorityQueue {
   dequeue(): Patient | undefined {
     if (this.heap.length === 0) return undefined;
     const top = this.heap[0];
-    const last = this.heap.pop()!;
+    const last = this.heap.pop() as Patient;
     if (this.heap.length > 0) {
       this.heap[0] = last;
       let i = 0;
@@ -87,7 +87,7 @@ export class PriorityQueue {
   remove(id: string): boolean {
     const idx = this.heap.findIndex((p) => p.id === id);
     if (idx === -1) return false;
-    const last = this.heap.pop()!;
+    const last = this.heap.pop() as Patient;
     if (idx < this.heap.length) {
       this.heap[idx] = last;
       // Restore heap property in both directions.

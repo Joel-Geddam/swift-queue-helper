@@ -60,7 +60,7 @@ export class PriorityQueue {
     while (i > 0) {
       const parent = (i - 1) >> 1;
       if (!higher(this.heap[i], this.heap[parent])) break;
-      [this.heap[i], this.heap[parent]] = [this.heap[parent], this.heap[i]];
+      [this.heap[i], this.heap[parent]] = [this.heap[parent]!, this.heap[i]!];
       i = parent;
     }
   }
@@ -79,7 +79,7 @@ export class PriorityQueue {
         if (l < this.heap.length && higher(this.heap[l], this.heap[smallest])) smallest = l;
         if (r < this.heap.length && higher(this.heap[r], this.heap[smallest])) smallest = r;
         if (smallest === i) break;
-        [this.heap[i], this.heap[smallest]] = [this.heap[smallest], this.heap[i]];
+        [this.heap[i], this.heap[smallest]] = [this.heap[smallest]!, this.heap[i]!];
         i = smallest;
       }
     }
@@ -97,7 +97,7 @@ export class PriorityQueue {
       while (i > 0) {
         const parent = (i - 1) >> 1;
         if (!higher(this.heap[i], this.heap[parent])) break;
-        [this.heap[i], this.heap[parent]] = [this.heap[parent], this.heap[i]];
+        [this.heap[i], this.heap[parent]] = [this.heap[parent]!, this.heap[i]!];
         i = parent;
       }
       for (;;) {
@@ -107,7 +107,7 @@ export class PriorityQueue {
         if (l < this.heap.length && higher(this.heap[l], this.heap[smallest])) smallest = l;
         if (r < this.heap.length && higher(this.heap[r], this.heap[smallest])) smallest = r;
         if (smallest === i) break;
-        [this.heap[i], this.heap[smallest]] = [this.heap[smallest], this.heap[i]];
+        [this.heap[i], this.heap[smallest]] = [this.heap[smallest]!, this.heap[i]!];
         i = smallest;
       }
     }

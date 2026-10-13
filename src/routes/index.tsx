@@ -208,6 +208,16 @@ function Index() {
             <input className={inputCls} placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} required />
             <input className={inputCls} placeholder="Age" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
             <input className={inputCls} placeholder="Symptoms / condition" value={condition} onChange={(e) => setCondition(e.target.value)} />
+            {flag && (
+              <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className={`rounded px-2 py-0.5 font-medium ${tierStyles[flag.tier]}`}>
+                  {tierLabel[flag.tier]}
+                </span>
+                <span>
+                  “{flag.matched.slice(0, 3).join(", ")}” raises urgency — score {computePriority(level, condition)}
+                </span>
+              </p>
+            )}
             <div>
               <p className="mb-2 text-xs font-medium text-muted-foreground">Triage level</p>
               <div className="grid grid-cols-3 gap-2">
@@ -260,6 +270,7 @@ function Index() {
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${levelStyles[current.level]}`}>
                       {levelLabel[current.level]}
                     </span>
+                    <FlagChip condition={current.condition} />
                   </div>
                 ) : (
                   <p className="mt-1 text-muted-foreground">No patient being served</p>
@@ -278,7 +289,9 @@ function Index() {
           <section className="rounded-lg border border-border bg-card">
             <div className="flex items-center justify-between border-b border-border px-5 py-3">
               <h2 className="font-semibold">Waiting queue</h2>
-              <span className="text-xs text-muted-foreground">{waiting.length} patients · sorted by priority, then arrival</span>
+              <span className="text-xs text-muted-foreground">
+                {waiting.length} patients · triage + symptoms, then arrival
+              </span>
             </div>
             {waiting.length === 0 ? (
               <p className="px-5 py-10 text-center text-sm text-muted-foreground">Queue is empty.</p>
@@ -295,6 +308,7 @@ function Index() {
                         {p.condition}
                       </p>
                     </div>
+                    <FlagChip condition={p.condition} />
                     <span className="text-xs text-muted-foreground">{waitTime(p.arrivedAt, now)}</span>
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${levelStyles[p.level]}`}>
                       {levelLabel[p.level]}

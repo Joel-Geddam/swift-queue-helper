@@ -23,7 +23,9 @@ export interface Patient {
   status: "waiting" | "called" | "served";
 }
 
-function higher(a: Patient, b: Patient): boolean {
+function higher(a: Patient | undefined, b: Patient | undefined): boolean {
+  if (!a) return false;
+  if (!b) return true;
   if (a.priority !== b.priority) return a.priority < b.priority;
   return a.arrivedAt < b.arrivedAt;
 }

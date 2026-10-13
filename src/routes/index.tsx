@@ -3,7 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PriorityQueue,
   TRIAGE_PRIORITY,
+  analyseSymptoms,
+  computePriority,
   type Patient,
+  type SymptomTier,
   type TriageLevel,
 } from "@/lib/priorityQueue";
 
@@ -41,6 +44,31 @@ const levelLabel: Record<TriageLevel, string> = {
   standard: "P3 · Standard",
 };
 
+const tierStyles: Record<SymptomTier, string> = {
+  critical: "bg-emergency text-emergency-foreground",
+  urgent: "bg-urgent text-urgent-foreground",
+  mild: "border border-border bg-muted text-muted-foreground",
+};
+
+const tierLabel: Record<SymptomTier, string> = {
+  critical: "Critical sign",
+  urgent: "Urgent sign",
+  mild: "Mild sign",
+};
+
+function FlagChip({ condition }: { condition: string }) {
+  const flag = analyseSymptoms(condition);
+  if (!flag) return null;
+  return (
+    <span
+      title={flag.matched.join(", ")}
+      className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${tierStyles[flag.tier]}`}
+    >
+      {tierLabel[flag.tier]}
+    </span>
+  );
+}
+
 function waitTime(from: number, now: number) {
   const m = Math.floor((now - from) / 60000);
   return m < 1 ? "<1 min" : `${m} min`;
@@ -66,7 +94,11 @@ function Index() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        (s.waiting as Patient[]).forEach((p) => queueRef.current.enqueue(p));
+        (s.waiting as Patient[]).forEach((p) => {
+          // Re-score with the current formula so saved rows stay comparable.
+          p.priority = computePriority(p.level, p.condition);
+          queueRef.current.enqueue(p);
+        });
         setCurrent(s.current ?? null);
         setServed(s.served ?? []);
         setTicket(s.ticket ?? 1);
@@ -110,7 +142,7 @@ function Index() {
       age: Number(age) || 0,
       condition: condition.trim() || "—",
       level,
-      priority: TRIAGE_PRIORITY[level],
+      priority: computePriority(level, condition),
       arrivedAt: Date.now(),
       status: "waiting",
     });

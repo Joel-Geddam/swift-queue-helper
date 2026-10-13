@@ -11,6 +11,117 @@ export const TRIAGE_PRIORITY: Record<TriageLevel, number> = {
   standard: 3,
 };
 
+/**
+ * Symptom screening. Certain words in the reported condition are clinical
+ * red flags, so they lift a patient up the queue regardless of the triage
+ * level the desk picked. Only the highest tier matched counts — listing five
+ * mild symptoms can never outrank one critical sign.
+ */
+export type SymptomTier = "critical" | "urgent" | "mild";
+
+const SYMPTOM_KEYWORDS: Record<SymptomTier, string[]> = {
+  critical: [
+    "cardiac arrest",
+    "not breathing",
+    "no pulse",
+    "unconscious",
+    "unresponsive",
+    "stopped breathing",
+    "choking",
+    "severe bleeding",
+    "heavy bleeding",
+    "hemorrhage",
+    "haemorrhage",
+    "seizure",
+    "convulsion",
+    "anaphylaxis",
+    "blue lips",
+    "cyanosis",
+    "overdose",
+    "poisoning",
+    "suicidal",
+    "self-harm",
+    "head injury",
+    "stroke",
+    "gasping",
+    "crushing pain",
+  ],
+  urgent: [
+    "chest pain",
+    "difficulty breathing",
+    "shortness of breath",
+    "breathless",
+    "high fever",
+    "vomiting blood",
+    "blood in stool",
+    "fracture",
+    "broken bone",
+    "severe pain",
+    "dehydration",
+    "confusion",
+    "slurred speech",
+    "face drooping",
+    "abdominal pain",
+    "pregnant",
+    "snake bite",
+    "dog bite",
+    "burn",
+    "deep cut",
+    "fainted",
+    "fainting",
+    "palpitations",
+  ],
+  mild: [
+    "cough",
+    "cold",
+    "sore throat",
+    "fever",
+    "headache",
+    "rash",
+    "nausea",
+    "diarrhea",
+    "diarrhoea",
+    "mild pain",
+    "sprain",
+    "checkup",
+    "check-up",
+    "follow-up",
+    "prescription",
+    "refill",
+    "dizziness",
+    "back pain",
+    "toothache",
+  ],
+};
+
+/** Points subtracted from the triage score — higher means more pressing. */
+const TIER_BOOST: Record<SymptomTier, number> = { critical: 180, urgent: 80, mild: 20 };
+
+export interface SymptomFlag {
+  tier: SymptomTier;
+  matched: string[];
+  boost: number;
+}
+
+/** Highest-severity tier whose keywords appear in the text, or null. */
+export function analyseSymptoms(text: string): SymptomFlag | null {
+  const t = ` ${text.toLowerCase()} `;
+  for (const tier of ["critical", "urgent", "mild"] as SymptomTier[]) {
+    const matched = SYMPTOM_KEYWORDS[tier].filter((k) => t.includes(k));
+    if (matched.length) return { tier, matched, boost: TIER_BOOST[tier] };
+  }
+  return null;
+}
+
+/**
+ * priority = (triage level × 100) − symptom boost.  Lower is seen sooner.
+ * e.g. emergency+unresponsive = 100−180 = −80  ·  urgent = 200  ·  standard = 300
+ */
+export function computePriority(level: TriageLevel, condition: string): number {
+  return TRIAGE_PRIORITY[level] * 100 - (analyseSymptoms(condition)?.boost ?? 0);
+}
+
+
 export interface Patient {
   id: string;
   ticket: number;

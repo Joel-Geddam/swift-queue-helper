@@ -292,7 +292,7 @@ function Index() {
             <div className="flex items-center justify-between border-b border-border px-5 py-3">
               <h2 className="font-semibold">Waiting queue</h2>
               <span className="text-xs text-muted-foreground">
-                {waiting.length} patients · triage + symptoms, then arrival
+                0 patientsl
               </span>
             </div>
             {waiting.length === 0 ? (

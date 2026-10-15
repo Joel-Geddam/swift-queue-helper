@@ -114,11 +114,29 @@ export function analyseSymptoms(text: string): SymptomFlag | null {
 }
 
 /**
- * priority = (triage level × 100) − symptom boost.  Lower is seen sooner.
+ * priority = (triage level × 100) − symptom boost − wait boost.  Lower is seen sooner.
  * e.g. emergency+unresponsive = 100−180 = −80  ·  urgent = 200  ·  standard = 300
  */
 export function computePriority(level: TriageLevel, condition: string): number {
   return TRIAGE_PRIORITY[level] * 100 - (analyseSymptoms(condition)?.boost ?? 0);
+}
+
+/**
+ * Waiting time also counts: a patient earns 2 points per minute waited,
+ * capped at 80 so a long wait can never overtake a higher triage level
+ * (levels sit 100 points apart).
+ */
+export const WAIT_BONUS_PER_MIN = 2;
+export const WAIT_BONUS_CAP = 80;
+
+export function waitBoost(arrivedAt: number, now: number): number {
+  const mins = Math.max(0, Math.floor((now - arrivedAt) / 60000));
+  return Math.min(WAIT_BONUS_CAP, mins * WAIT_BONUS_PER_MIN);
+}
+
+/** Priority including the wait bonus for a given moment in time. */
+export function effectivePriority(p: Patient, now: number): number {
+  return p.priority - waitBoost(p.arrivedAt, now);
 }
 
 

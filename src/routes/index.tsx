@@ -9,6 +9,7 @@ import {
   type SymptomTier,
   type TriageLevel,
 } from "@/lib/priorityQueue";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -181,15 +182,13 @@ function Index() {
     "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-b from-accent/60 to-background">
+      <header className="sticky top-0 z-10 border-b border-border bg-card/80 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-lg font-bold text-primary-foreground">
-              +
-            </div>
+            <img src={logo} alt="MediQueue logo" width={40} height={40} className="h-10 w-10" />
             <div>
-              <h1 className="text-lg font-semibold leading-tight">MediQueue</h1>
+              <h1 className="text-lg font-bold leading-tight tracking-tight">MediQueue</h1>
               <p className="text-xs text-muted-foreground">Priority-based patient queue</p>
             </div>
           </div>
@@ -205,7 +204,7 @@ function Index() {
       <main className="mx-auto grid max-w-6xl gap-6 px-6 py-6 lg:grid-cols-[340px_1fr]">
         {/* Left column */}
         <div className="space-y-6">
-          <form onSubmit={addPatient} className="space-y-3 rounded-lg border border-border bg-card p-5">
+          <form onSubmit={addPatient} className="space-y-3 rounded-xl border border-border bg-card shadow-sm p-5">
             <h2 className="font-semibold">Register patient</h2>
             <input className={inputCls} placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} required />
             <input className={inputCls} placeholder="Age" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
@@ -244,7 +243,7 @@ function Index() {
 
           <div className="grid grid-cols-3 gap-2">
             {(Object.keys(counts) as TriageLevel[]).map((l) => (
-              <div key={l} className="rounded-lg border border-border bg-card p-3 text-center">
+              <div key={l} className="rounded-xl border border-border bg-card shadow-sm p-3 text-center">
                 <div className={`mx-auto mb-1 h-1.5 w-8 rounded-full ${levelStyles[l]}`} />
                 <div className="text-2xl font-semibold">{counts[l]}</div>
                 <div className="text-xs capitalize text-muted-foreground">{l}</div>
@@ -255,7 +254,7 @@ function Index() {
 
         {/* Right column */}
         <div className="space-y-6">
-          <section className="rounded-lg border border-border bg-card p-5">
+          <section className="rounded-xl border-2 border-primary/30 bg-card p-6 shadow-md">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Now serving</p>
@@ -288,11 +287,11 @@ function Index() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-border bg-card">
+          <section className="rounded-xl border border-border bg-card shadow-sm">
             <div className="flex items-center justify-between border-b border-border px-5 py-3">
               <h2 className="font-semibold">Waiting queue</h2>
               <span className="text-xs text-muted-foreground">
-                0 patients
+                {waiting.length} {waiting.length === 1 ? "patient" : "patients"} waiting
               </span>
             </div>
             {waiting.length === 0 ? (
@@ -329,7 +328,7 @@ function Index() {
           </section>
 
           {served.length > 0 && (
-            <section className="rounded-lg border border-border bg-card">
+            <section className="rounded-xl border border-border bg-card shadow-sm">
               <h2 className="border-b border-border px-5 py-3 font-semibold">Recently served</h2>
               <ul className="divide-y divide-border">
                 {served.map((p) => (

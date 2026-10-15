@@ -9,6 +9,7 @@ import {
   type SymptomTier,
   type TriageLevel,
 } from "@/lib/priorityQueue";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -181,15 +182,13 @@ function Index() {
     "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-b from-accent/60 to-background">
+      <header className="sticky top-0 z-10 border-b border-border bg-card/80 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-lg font-bold text-primary-foreground">
-              +
-            </div>
+            <img src={logo} alt="MediQueue logo" width={40} height={40} className="h-10 w-10" />
             <div>
-              <h1 className="text-lg font-semibold leading-tight">MediQueue</h1>
+              <h1 className="text-lg font-bold leading-tight tracking-tight">MediQueue</h1>
               <p className="text-xs text-muted-foreground">Priority-based patient queue</p>
             </div>
           </div>

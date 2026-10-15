@@ -242,4 +242,30 @@ export class PriorityQueue {
     }
     return true;
   }
+
+  /**
+   * Fold the current wait bonus into every patient's priority and rebuild
+   * the heap. Call before dequeueing or rendering so long-waiting patients
+   * move up. Base score is recomputed from level+condition first, so this
+   * is idempotent.
+   */
+  rescore(now: number): void {
+    for (const p of this.heap) {
+      p.priority = computePriority(p.level, p.condition) - waitBoost(p.arrivedAt, now);
+    }
+    // Heapify bottom-up.
+    for (let i = (this.heap.length >> 1) - 1; i >= 0; i--) {
+      let j = i;
+      for (;;) {
+        const l = 2 * j + 1;
+        const r = 2 * j + 2;
+        let smallest = j;
+        if (l < this.heap.length && higher(this.heap[l], this.heap[smallest])) smallest = l;
+        if (r < this.heap.length && higher(this.heap[r], this.heap[smallest])) smallest = r;
+        if (smallest === j) break;
+        [this.heap[j], this.heap[smallest]] = [this.heap[smallest]!, this.heap[j]!];
+        j = smallest;
+      }
+    }
+  }
 }

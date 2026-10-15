@@ -5,6 +5,7 @@ import {
   TRIAGE_PRIORITY,
   analyseSymptoms,
   computePriority,
+  waitBoost,
   type Patient,
   type SymptomTier,
   type TriageLevel,
@@ -125,7 +126,10 @@ function Index() {
   }, []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const waiting = useMemo(() => queueRef.current.sorted(), [version]);
+  const waiting = useMemo(() => {
+    queueRef.current.rescore(now);
+    return queueRef.current.sorted();
+  }, [version, now]);
 
   const counts = useMemo(() => {
     const c = { emergency: 0, urgent: 0, standard: 0 };
@@ -156,6 +160,7 @@ function Index() {
   }
 
   function callNext() {
+    queueRef.current.rescore(Date.now());
     const next = queueRef.current.dequeue();
     if (current) setServed((s) => [{ ...current, status: "served" as const }, ...s].slice(0, 20));
     setCurrent(next ? { ...next, status: "called" } : null);
@@ -311,6 +316,14 @@ function Index() {
                     </div>
                     <FlagChip condition={p.condition} />
                     <span className="text-xs text-muted-foreground">{waitTime(p.arrivedAt, now)}</span>
+                    {waitBoost(p.arrivedAt, now) > 0 && (
+                      <span
+                        title="Wait bonus: long-waiting patients move up the queue"
+                        className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                      >
+                        +wait
+                      </span>
+                    )}
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${levelStyles[p.level]}`}>
                       {levelLabel[p.level]}
                     </span>

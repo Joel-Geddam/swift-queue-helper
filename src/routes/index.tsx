@@ -78,6 +78,13 @@ function waitTime(from: number, now: number) {
 
 function Index() {
   const queueRef = useRef(new PriorityQueue());
+  // After a live code reload the ref may hold a queue built from an older
+  // version of the class (missing newer methods). Rebuild it with the same patients.
+  if (!(queueRef.current instanceof PriorityQueue) || typeof queueRef.current.rescore !== "function") {
+    const fresh = new PriorityQueue();
+    for (const p of (queueRef.current as PriorityQueue).toArray()) fresh.enqueue(p);
+    queueRef.current = fresh;
+  }
   const [version, setVersion] = useState(0);
   const [current, setCurrent] = useState<Patient | null>(null);
   const [served, setServed] = useState<Patient[]>([]);

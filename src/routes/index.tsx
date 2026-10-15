@@ -316,6 +316,14 @@ function Index() {
                     </div>
                     <FlagChip condition={p.condition} />
                     <span className="text-xs text-muted-foreground">{waitTime(p.arrivedAt, now)}</span>
+                    {waitBoost(p.arrivedAt, now) > 0 && (
+                      <span
+                        title="Wait bonus: long-waiting patients move up the queue"
+                        className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                      >
+                        +wait
+                      </span>
+                    )}
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${levelStyles[p.level]}`}>
                       {levelLabel[p.level]}
                     </span>

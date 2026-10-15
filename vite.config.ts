@@ -23,7 +23,7 @@ export default defineConfig({
     server: { entry: "server" },
     ...(staticBuild
       ? {
-          spa: true,
+          spa: { enabled: true },
           router: { basepath: base === "/" ? "" : base.replace(/\/+$/, "") },
         }
       : {}),

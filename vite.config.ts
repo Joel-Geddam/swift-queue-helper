@@ -22,7 +22,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
     ...(staticBuild
-      ? { prerender: { crawlLinks: true, failOnError: false } }
+      ? {
+          router: { basepath: base.replace(/\/+$/, "") === "/" ? "" : base.replace(/\/+$/, "") },
+          prerender: { crawlLinks: true, failOnError: false },
+        }
       : {}),
   },
 });

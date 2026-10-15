@@ -204,7 +204,7 @@ function Index() {
       <main className="mx-auto grid max-w-6xl gap-6 px-6 py-6 lg:grid-cols-[340px_1fr]">
         {/* Left column */}
         <div className="space-y-6">
-          <form onSubmit={addPatient} className="space-y-3 rounded-lg border border-border bg-card p-5">
+          <form onSubmit={addPatient} className="space-y-3 rounded-xl border border-border bg-card shadow-sm p-5">
             <h2 className="font-semibold">Register patient</h2>
             <input className={inputCls} placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} required />
             <input className={inputCls} placeholder="Age" type="number" min={0} value={age} onChange={(e) => setAge(e.target.value)} />
@@ -243,7 +243,7 @@ function Index() {
 
           <div className="grid grid-cols-3 gap-2">
             {(Object.keys(counts) as TriageLevel[]).map((l) => (
-              <div key={l} className="rounded-lg border border-border bg-card p-3 text-center">
+              <div key={l} className="rounded-xl border border-border bg-card shadow-sm p-3 text-center">
                 <div className={`mx-auto mb-1 h-1.5 w-8 rounded-full ${levelStyles[l]}`} />
                 <div className="text-2xl font-semibold">{counts[l]}</div>
                 <div className="text-xs capitalize text-muted-foreground">{l}</div>
@@ -254,7 +254,7 @@ function Index() {
 
         {/* Right column */}
         <div className="space-y-6">
-          <section className="rounded-lg border border-border bg-card p-5">
+          <section className="rounded-xl border-2 border-primary/30 bg-card p-6 shadow-md">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Now serving</p>
@@ -287,11 +287,11 @@ function Index() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-border bg-card">
+          <section className="rounded-xl border border-border bg-card shadow-sm">
             <div className="flex items-center justify-between border-b border-border px-5 py-3">
               <h2 className="font-semibold">Waiting queue</h2>
               <span className="text-xs text-muted-foreground">
-                0 patients
+                {waiting.length} {waiting.length === 1 ? "patient" : "patients"} waiting
               </span>
             </div>
             {waiting.length === 0 ? (
@@ -328,7 +328,7 @@ function Index() {
           </section>
 
           {served.length > 0 && (
-            <section className="rounded-lg border border-border bg-card">
+            <section className="rounded-xl border border-border bg-card shadow-sm">
               <h2 className="border-b border-border px-5 py-3 font-semibold">Recently served</h2>
               <ul className="divide-y divide-border">
                 {served.map((p) => (
